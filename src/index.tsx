@@ -7,16 +7,23 @@ const LINKING_ERROR =
   '- You are not using Expo Go\n';
 
 const InstantpayRdService = NativeModules.InstantpayRdService
-  ? NativeModules.InstantpayRdService
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
+    ? NativeModules.InstantpayRdService
+    : new Proxy(
+        {},
+        {
+            get() {
+            throw new Error(LINKING_ERROR);
+            },
+        }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return InstantpayRdService.multiply(a, b);
+const RdService = (Platform.OS === "ios") ? null : {
+
+    getFingerPrint: (deviceName:string,pidOption:string) => {
+
+        return InstantpayRdService.getFingerPrint(deviceName,pidOption);
+    }
 }
+    
+    
+export default RdService;
