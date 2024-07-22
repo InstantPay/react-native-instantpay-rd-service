@@ -45,7 +45,7 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
                 return resolve("No action taken")
             }
 
-            if(resultCode == RDINFO_CODE){
+            if(requestCode == RDINFO_CODE){
                 val requiredValue = data.getStringExtra("RD_SERVICE_INFO")
 
                 if(requiredValue == null){
@@ -64,7 +64,7 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
                 return
             }
 
-            if(resultCode == RDCAPTURE_CODE){
+            if(requestCode == RDCAPTURE_CODE){
 
                 val captureXML = data.getStringExtra("PID_DATA")
 
