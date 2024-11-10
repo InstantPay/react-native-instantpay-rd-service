@@ -7,7 +7,7 @@ RD service supported device :
 1. Morpho
 2. Mantra
 3. PB510
-4. SecuGen and many more...
+4. SecuGen and many more....
 
 
 ## Installation
