@@ -196,7 +196,7 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
             activity.startActivityForResult(intent, RDFACECAPTURE_CODE)
         }
         catch (e: Exception) {
-            resolve("Face Auth services not available" , FAILED, "", "", e.message.toString()+" #GFPRD2")
+            resolve("Face Auth services not available, Please install AadhaarFaceRD from play store." , FAILED, "", "", e.message.toString()+" #GFPRD2")
         }
     }
 
