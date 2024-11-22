@@ -22,7 +22,11 @@ const RdService = (Platform.OS === "ios") ? null : {
     getFingerPrint: (deviceName:string,pidOption:string) => {
 
         return InstantpayRdService.getFingerPrint(deviceName,pidOption);
-    }
+    },
+    openFaceAuth: (pidOption:string,) => {
+
+        return InstantpayRdService.openFaceAuth(pidOption);
+    },
 }
     
     

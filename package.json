@@ -1,6 +1,6 @@
 {
   "name": "react-native-instantpay-rd-service",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Reading finger print data using RD services in Android.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",

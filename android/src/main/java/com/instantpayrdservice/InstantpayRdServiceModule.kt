@@ -3,6 +3,7 @@ package com.instantpayrdservice
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Base64
 import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.BaseActivityEventListener
@@ -11,6 +12,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
+import java.security.MessageDigest
+import kotlin.random.Random
 
 
 class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -30,6 +33,8 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
         const val NAME = "InstantpayRdService"
         const val RDINFO_CODE = 1
         const val RDCAPTURE_CODE = 2
+        const val RDFACECAPTURE_CODE = 3
+        const val RDEYECAPTURE_CODE = 4
     }
 
     private val activityEventListener = object : BaseActivityEventListener(){
@@ -77,6 +82,23 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
                 }
 
                 val sanitizeXml = parseBioMetricData(captureXML)
+
+                return resolve("Successfully Captured the data",SUCCESS, sanitizeXml)
+            }
+
+            if(requestCode == RDFACECAPTURE_CODE){
+                /*val resultData = StringBuilder("Request Code: $requestCode, Result Code: $resultCode\n")
+                data.extras?.let { bundle ->
+                    for (key in bundle.keySet()) {
+                        val value = bundle.get(key)
+                        logPrint("Key: ${key}, Value: $value")
+                        resultData.append("Key: $key, Value: $value; ")
+                    }
+                }*/
+
+                val captureXML = data.getStringExtra("response")
+
+                val sanitizeXml = parseBioMetricData(captureXML!!)
 
                 return resolve("Successfully Captured the data",SUCCESS, sanitizeXml)
             }
@@ -146,6 +168,137 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
         }
         catch (e: Exception) {
             resolve("RD services not available" , FAILED, "", "", e.message.toString()+" #GFPRD1")
+        }
+    }
+
+    @ReactMethod
+    fun openFaceAuth(pidOption: String, prm: Promise){
+        try {
+            responsePromise = prm
+
+            //pidOptionParam = pidOption
+
+            val activity = currentActivity ?: return resolve("Activity doesn't exist "+"#CPDRD4")
+
+            val CAPTURE_INTENT = "in.gov.uidai.rdservice.face.CAPTURE"
+
+            val CAPTURE_INTENT_REQUEST = "request"
+
+            val intent = Intent(CAPTURE_INTENT)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+            //intent.putExtra(CAPTURE_INTENT_REQUEST, createFacePidOptionForAuth(getRandomNumber(), "P"))
+
+            //intent.putExtra(CAPTURE_INTENT_REQUEST,createFacePidOptionForKUA(getRandomNumber(), "P"))
+
+            intent.putExtra(CAPTURE_INTENT_REQUEST, pidOption)
+
+            activity.startActivityForResult(intent, RDFACECAPTURE_CODE)
+        }
+        catch (e: Exception) {
+            resolve("Face Auth services not available" , FAILED, "", "", e.message.toString()+" #GFPRD2")
+        }
+    }
+
+    private fun getRandomNumber(): String {
+
+        val start = 10000000
+
+        val end = 99999999
+
+        val number = Random(System.nanoTime()).nextInt(end - start + 1) + start
+
+        return number.toString()
+    }
+
+    fun createFacePidOptionForAuth(txnId: String, buildType:String): String {
+        return createFacePidOptions(txnId, "auth", buildType)
+    }
+
+    private fun createFacePidOptions(txnId: String, purpose: String, buildType:String): String {
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+
+                "<PidOptions ver=\"1.0\" env=\"${buildType}\">\n" +
+
+                "   <Opts fCount=\"\" fType=\"\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"\" pidVer=\"2.0\" timeout=\"\" otp=\"\"  posh=\"\" />\n" +
+
+                "   <CustOpts>\n" +
+
+                "      <Param name=\"txnId\" value=\"${txnId}\"/>\n" +
+
+                "      <Param name=\"purpose\" value=\"$purpose\"/>\n" +
+
+                "      <Param name=\"language\" value=\"N\"/>\n" +
+
+                "   </CustOpts>\n" +
+
+                "</PidOptions>"
+
+    }
+
+    fun createFacePidOptionForKUA(txnId: String, buildType:String): String {
+        return createFacePidOptionsKUA(txnId, "auth", getWADHForFace(), buildType)
+    }
+
+    fun getWADHForFace(): String {
+        val VERSION = "2.5"
+        val RESIDENT_AUTHENTICATION_TYPE = "P"
+        val RESIDENT_CONSENT = "Y"
+        var LOCAL_LANGUAGE_IR = "N"
+        val DECRYPTION = "N"
+        val PRINT_FORMAT="N"
+        return getWADHValueForFace(VERSION + RESIDENT_AUTHENTICATION_TYPE + RESIDENT_CONSENT + LOCAL_LANGUAGE_IR + DECRYPTION + PRINT_FORMAT)
+    }
+
+    private fun getWADHValueForFace(plainWADH: String): String {
+        val hash = MessageDigest.getInstance("SHA-256").digest(plainWADH.toByteArray())
+        return Base64.encodeToString(hash, Base64.NO_WRAP)
+    }
+
+    private fun createFacePidOptionsKUA(txnId: String, purpose: String, wadh:String, buildType:String): String {
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+
+                "<PidOptions ver=\"1.0\" env=\"${buildType}\">\n" +
+
+                "   <Opts fCount=\"\" fType=\"\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"\" pidVer=\"2.0\" timeout=\"\" otp=\"\" wadh=\"${wadh}\" posh=\"\" />\n" +
+
+                "   <CustOpts>\n" +
+
+                "      <Param name=\"txnId\" value=\"${txnId}\"/>\n" +
+
+                "      <Param name=\"purpose\" value=\"$purpose\"/>\n" +
+
+                "      <Param name=\"language\" value=\"IR\"/>\n" +
+
+                "   </CustOpts>\n" +
+
+                "</PidOptions>"
+    }
+
+    @ReactMethod
+    fun openEyeAuth(pidOption: String, prm: Promise){
+        try {
+            responsePromise = prm
+
+            val activity = currentActivity ?: return resolve("Activity doesn't exist "+"#CPDRD5")
+
+            //Intent intent = new Intent("in.gov.uidai.rdservice.iris.INFO");
+
+            val CAPTURE_INTENT = "in.gov.uidai.rdservice.iris.CAPTURE"
+
+            val CAPTURE_INTENT_REQUEST = "PID_OPTIONS"
+
+            val intent = Intent(CAPTURE_INTENT)
+            //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+            intent.putExtra(CAPTURE_INTENT_REQUEST, pidOption)
+
+            activity.startActivityForResult(intent, RDEYECAPTURE_CODE)
+        }
+        catch (e: Exception) {
+            resolve("Iris Eye Auth services not available" , FAILED, "", "", e.message.toString()+" #OEARD1")
         }
     }
 
