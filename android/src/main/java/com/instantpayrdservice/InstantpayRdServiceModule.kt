@@ -34,7 +34,9 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
         const val RDINFO_CODE = 1
         const val RDCAPTURE_CODE = 2
         const val RDFACECAPTURE_CODE = 3
-        const val RDEYECAPTURE_CODE = 4
+        const val RDEYEINFO_CODE = 4
+        const val RDEYECAPTURE_CODE = 5
+
     }
 
     private val activityEventListener = object : BaseActivityEventListener(){
@@ -69,6 +71,25 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
                 return
             }
 
+            if(requestCode == RDEYEINFO_CODE){
+                val requiredValue = data.getStringExtra("RD_SERVICE_INFO")
+
+                if(requiredValue == null){
+                    return resolve("Device not ready")
+                }
+
+                if(requiredValue.length <= 10){
+                    return resolve("Device not ready" , FAILED, "", "", requiredValue+" #RDRES6")
+                }
+
+                if(requiredValue.lowercase().contains("notready" , true)){
+                    return resolve("Device not ready" , FAILED, "", "", requiredValue+" #RDRES7")
+                }
+
+                eyeCaptureData()
+                return
+            }
+
             if(requestCode == RDCAPTURE_CODE){
 
                 val captureXML = data.getStringExtra("PID_DATA")
@@ -99,6 +120,32 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
                 val captureXML = data.getStringExtra("response")
 
                 val sanitizeXml = parseBioMetricData(captureXML!!)
+
+                return resolve("Successfully Captured the data",SUCCESS, sanitizeXml)
+            }
+
+            if(requestCode == RDEYECAPTURE_CODE){
+
+                /*val resultData = StringBuilder("Request Code: $requestCode, Result Code: $resultCode\n")
+                data.extras?.let { bundle ->
+                    for (key in bundle.keySet()) {
+                        val value = bundle.get(key)
+                        logPrint("Key: ${key}, Value: $value")
+                        resultData.append("Key: $key, Value: $value; ")
+                    }
+                }*/
+
+                val captureXML = data.getStringExtra("PID_DATA")
+
+                if (captureXML == null || captureXML.length <= 10) {
+                    return resolve("Device not ready" , FAILED, "", "", captureXML+" #RDRES4")
+                }
+
+                if (captureXML.lowercase().contains("device not ready", true)) {
+                    return resolve("Device not ready" , FAILED, "", "", captureXML+" #RDRES5")
+                }
+
+                val sanitizeXml = parseBioMetricData(captureXML)
 
                 return resolve("Successfully Captured the data",SUCCESS, sanitizeXml)
             }
@@ -278,27 +325,52 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : ReactCo
     }
 
     @ReactMethod
-    fun openEyeAuth(pidOption: String, prm: Promise){
+    fun openEyeAuth(deviceName: String, pidOption: String, prm: Promise){
         try {
             responsePromise = prm
-
-            val activity = currentActivity ?: return resolve("Activity doesn't exist "+"#CPDRD5")
-
-            //Intent intent = new Intent("in.gov.uidai.rdservice.iris.INFO");
-
-            val CAPTURE_INTENT = "in.gov.uidai.rdservice.iris.CAPTURE"
-
-            val CAPTURE_INTENT_REQUEST = "PID_OPTIONS"
-
-            val intent = Intent(CAPTURE_INTENT)
-            //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-
-            intent.putExtra(CAPTURE_INTENT_REQUEST, pidOption)
-
-            activity.startActivityForResult(intent, RDEYECAPTURE_CODE)
+            packageNameParam = deviceName
+            pidOptionParam = pidOption
+            eyeDeviceInfo()
         }
         catch (e: Exception) {
             resolve("Iris Eye Auth services not available" , FAILED, "", "", e.message.toString()+" #OEARD1")
+        }
+    }
+
+    private fun eyeDeviceInfo(){
+        try {
+
+            val activity = currentActivity ?: return resolve("Activity doesn't exist "+"#EDVIRD1")
+
+            val intent =  Intent()
+            intent.setAction("in.gov.uidai.rdservice.iris.INFO")
+            activity.startActivityForResult(intent, RDEYEINFO_CODE)
+        }
+        catch (e: Exception){
+            resolve("RD services not available" , FAILED, "", "", e.message.toString()+" #DVIRD1")
+        }
+    }
+
+    private fun eyeCaptureData(){
+        try {
+
+            val activity = currentActivity ?: return resolve("Activity doesn't exist "+"#ECPDRD1")
+
+            var pidOption  = "<?xml version=\"1.0\"?><PidOptions ver=\"1.0\"> <Opts fCount=\"0\" fType=\"0\" iCount=\"1\" iType=\"0\" pCount=\"0\" pType=\"0\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" posh=\"UNKNOWN\" env=\"P\"/><CustOpts></CustOpts></PidOptions>"
+
+            if (pidOptionParam.length >= 10 ) {
+                pidOption = pidOptionParam
+            }
+
+            val intent = Intent()
+            intent.setAction("in.gov.uidai.rdservice.iris.CAPTURE")
+            intent.putExtra("PID_OPTIONS", pidOption)
+            intent.setPackage(packageNameParam)
+
+            activity.startActivityForResult(intent, RDEYECAPTURE_CODE)
+        }
+        catch (e:Exception){
+            resolve("Selected device not found" , FAILED, "", "", e.message.toString()+" #CPDRD1")
         }
     }
 
