@@ -4,6 +4,7 @@ export interface Spec extends TurboModule {
     getFingerPrint(deviceName: string, pidOption: string): Promise<string>;
     openFaceAuth(pidOption: string): Promise<string>;
     openEyeAuth(deviceName: string, pidOption: string): Promise<string>;
+    openAadhaarAuth(token: string): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('InstantpayRdService');

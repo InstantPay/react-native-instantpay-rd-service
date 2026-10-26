@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Text, Button, Alert } from 'react-native';
 import RdService from 'react-native-instantpay-rd-service';
 
 export default function App() {
@@ -18,11 +18,24 @@ export default function App() {
         console.log(output)
     }
 
+    const aadhaarAuth = async () => {
+
+        let output = await RdService.openAadhaarAuth('');
+        
+        //Alert.alert('Aadhaar Auth Result', JSON.stringify(output), [{ text: 'OK' }]);
+        console.log(output)
+    }
+
     return (
         <View style={styles.container}>
             <Button 
                 title='Open Eye RD'
                 onPress={eyeRd}
+            />
+            <Text></Text>
+            <Button 
+                title='Open Aadhaar Auth'
+                onPress={aadhaarAuth}
             />
             <Text>Result: {result}</Text>
         </View>

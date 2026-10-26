@@ -28,6 +28,7 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : NativeI
         const val RDFACECAPTURE_CODE = 3
         const val RDEYEINFO_CODE = 4
         const val RDEYECAPTURE_CODE = 5
+        const val AADHAAR_AUTH_INFO_CODE = 6
     }
 
     private val activityEventListener = object : BaseActivityEventListener(){
@@ -139,6 +140,19 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : NativeI
                 val sanitizeXml = parseBioMetricData(captureXML)
 
                 return resolve("Successfully Captured the data",SUCCESS, sanitizeXml)
+            }
+
+            if(requestCode == AADHAAR_AUTH_INFO_CODE){
+                val resultData = StringBuilder("Request Code: $requestCode, Result Code: $resultCode\n")
+                data.extras?.let { bundle ->
+                    for (key in bundle.keySet()) {
+                        val value = bundle.get(key)
+                        logPrint("Key: ${key}, Value: $value")
+                        resultData.append("Key: $key, Value: $value; ")
+                    }
+                }
+
+                return resolve("Successfully Captured the data",SUCCESS, resultData.toString())
             }
         }
     }
@@ -361,6 +375,23 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : NativeI
         }
         catch (e:Exception){
             resolve("Selected device not found" , FAILED, "", "", e.message.toString()+" #CPDRD1")
+        }
+    }
+
+    override fun openAadhaarAuth(token: String, promise: Promise) {
+        try {
+            responsePromise = promise
+
+            val activity = reactApplicationContext.currentActivity ?: return resolve("Activity doesn't exist "+"#OAARD3")
+
+            val intent = Intent("in.gov.uidai.pehchaan.INTENT_REQUEST").apply {
+                putExtra("request", token)
+            }
+
+            activity.startActivityForResult(intent, AADHAAR_AUTH_INFO_CODE)
+        }
+        catch (e: Exception) {
+            resolve("Aadhaar Auth services not available" , FAILED, "", "", e.message.toString()+" #OAARD1")
         }
     }
 

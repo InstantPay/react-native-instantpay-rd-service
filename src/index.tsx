@@ -1,9 +1,5 @@
 import InstantpayRdService from './NativeInstantpayRdService';
 
-/* export function multiply(a: number, b: number): number {
-    return InstantpayRdService.multiply(a, b);
-} */
-
 const RdService = {
     getFingerPrint: (deviceName:string,pidOption:string) => {
         return InstantpayRdService.getFingerPrint(deviceName,pidOption);
@@ -14,6 +10,9 @@ const RdService = {
     openEyeAuth: (deviceName:string,pidOption:string) => {
         return InstantpayRdService.openEyeAuth(deviceName,pidOption);
     },
+    openAadhaarAuth: (token:string) => {
+        return InstantpayRdService.openAadhaarAuth(token);
+    }
 }
     
     
