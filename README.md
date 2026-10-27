@@ -7,6 +7,7 @@ This module supports RD (Registered Device) services for biometric authenticatio
 * Fingerprint Capture: Integrates with certified RD fingerprint devices to capture biometric data.
 * Face Capture: Utilizes UIDAI-certified RD face authentication apps for capturing face biometrics.
 * Iris Capture: Integrates with certified RD Iris devices to capture biometric data.
+* OVSE Auth: Integrates with Aadhaar App to validate Aadhaar details.
 
 ### Installation ###
 
@@ -17,6 +18,7 @@ Ensure that the required RD service apps are installed on the device:
         * Permissions: Ensure that the app has the necessary permissions to interact with the RD service.
             * Camera permissions must be granted.
     3. Iris Devices: Install the respective RD service app for your device (e.g., Mantra, Morpho).
+    4. Aadhaar App: Ensure that the Aadhaar app is installed for OVSE authentication.
 
 
 ```sh
@@ -71,6 +73,10 @@ const result = await RdServices.openEyeAuth('<Package Name>', irisPidOption); //
 | `timeout` | `20000`   | 20 seconds capture timeout                |
 | `env`     | `P`       | Production (`P`), use `PP` for pre-prod   |
 | `posh`    | `UNKNOWN` | Position hint                             |
+
+
+// For OVSE Auth Capture
+let output = await RdService.openAadhaarAuth(<OVSE_JWT_TOKEN>);
 
 
 ```
