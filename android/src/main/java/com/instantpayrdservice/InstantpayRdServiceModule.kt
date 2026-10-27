@@ -389,7 +389,7 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : NativeI
             activity.startActivityForResult(intent, AADHAAR_AUTH_INFO_CODE)
         }
         catch (e: Exception) {
-            resolve("Aadhaar Auth services not available" , FAILED, "", "", e.message.toString()+" #OAARD1")
+            resolve("Aadhaar Auth services not available, Please install Aadhaar application from play store." , FAILED, "", "", e.message.toString()+" #OAARD1")
         }
     }
 
