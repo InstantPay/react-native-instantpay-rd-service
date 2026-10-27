@@ -143,16 +143,14 @@ class InstantpayRdServiceModule(reactContext: ReactApplicationContext) : NativeI
             }
 
             if(requestCode == AADHAAR_AUTH_INFO_CODE){
-                val resultData = StringBuilder("Request Code: $requestCode, Result Code: $resultCode\n")
-                data.extras?.let { bundle ->
-                    for (key in bundle.keySet()) {
-                        val value = bundle.get(key)
-                        logPrint("Key: ${key}, Value: $value")
-                        resultData.append("Key: $key, Value: $value; ")
-                    }
-                }
 
-                return resolve("Successfully Captured the data",SUCCESS, resultData.toString())
+                var aadhaarOutput: WritableMap = Arguments.createMap()
+
+                aadhaarOutput.putString("status",data.getStringExtra("status"))
+                aadhaarOutput.putString("response",data.getStringExtra("response"))
+                aadhaarOutput.putString("timestamp",data.getStringExtra("timestamp"))
+
+                return resolve("Successfully Captured the data",SUCCESS, aadhaarOutput.toString())
             }
         }
     }
