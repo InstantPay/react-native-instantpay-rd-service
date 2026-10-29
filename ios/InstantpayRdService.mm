@@ -84,7 +84,7 @@ static NSString * const FAILED = @"FAILED";
     //NSLog(@"[RdService TurboModule] Intercepted deep link successfully: %@", url.absoluteString);
     
     // Narrow safety checking: Ensure this link belongs to our specific transaction stream
-    if ([url.scheme isEqualToString:@"mymainapp"] && [url.host isEqualToString:@"in.gov.uidai.pehchaan"]) {
+    if ([url.scheme isEqualToString:@"ipayrdservice"] && [url.host isEqualToString:@"in.gov.uidai.pehchaan"]) {
         
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         //NSString *statusValue = nil;
@@ -152,7 +152,7 @@ static NSString * const FAILED = @"FAILED";
     //[self logPrint:[NSString stringWithFormat:@"Token : %@", token]];
     
     // 1. Construct the dynamic URL string using formatting
-    NSString *urlString = [NSString stringWithFormat:@"pehchaan://in.gov.uidai.pehchaan?request=%@&callback=mymainapp", token];
+    NSString *urlString = [NSString stringWithFormat:@"pehchaan://in.gov.uidai.pehchaan?request=%@&callback=ipayrdservice", token];
 
     // 2. Safely create the NSURL object
     NSURL *appURL = [NSURL URLWithString:urlString];
