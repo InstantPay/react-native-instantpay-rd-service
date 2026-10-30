@@ -75,11 +75,20 @@ const result = await RdServices.openEyeAuth('<Package Name>', irisPidOption); //
 | `posh`    | `UNKNOWN` | Position hint                             |
 
 
+```
+### OVSE Setup
+
+```js
 // For OVSE Auth Capture
 let output = await RdService.openAadhaarAuth(<OVSE_JWT_TOKEN>);
 
-
 ```
+### OVSE iOS Setup
+
+    1. Open your project in Xcode -> Go to the Info tab -> Scroll down to URL Types.
+    2. Click the + button to add a new record.
+    3. Set the URL Schemes property to ipayrdservice.
+
 
 ## License
 
