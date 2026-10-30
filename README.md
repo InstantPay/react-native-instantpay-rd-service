@@ -88,6 +88,11 @@ let output = await RdService.openAadhaarAuth(<OVSE_JWT_TOKEN>);
     1. Open your project in Xcode -> Go to the Info tab -> Scroll down to URL Types.
     2. Click the + button to add a new record.
     3. Set the URL Schemes property to ipayrdservice.
+    4. Add the following to your Info.plist file:
+        <key>LSApplicationQueriesSchemes</key>
+        <array>
+            <string>pehchaan</string>
+        </array>
 
 
 ## License
